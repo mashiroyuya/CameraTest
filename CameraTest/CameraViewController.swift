@@ -40,7 +40,7 @@ class ViewController: UIViewController {
         var videoInput:AVCaptureDeviceInput = AVCaptureDeviceInput()
         
         do{
-           videoInput = try AVCaptureDeviceInput(device: myDevice)
+            videoInput = try AVCaptureDeviceInput(device: myDevice)
         }catch{
             print("error video input")
         }
