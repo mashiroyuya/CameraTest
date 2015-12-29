@@ -18,9 +18,54 @@ class CaneraViewController: UIViewController {
     // 画像のアウトプット.
     var myImageOutput : AVCaptureStillImageOutput!
     
+    // camera variables
+    var isRequireTakePhoto: Bool = false
+    var isProcessing: Bool = false
+    var isFrontMode: Bool = false
+    var isFlashMode: Bool = false
+    var bitmap: Void?
+    //　画像のアウトプット
+    var videoOutput: AVCaptureVideoDataOutput!
+    var captureInput: AVCaptureInput!
+    //　セッション
+    var captureSession: AVCaptureSession!
+    var previewLayer: AVCaptureVideoPreviewLayer?
+    var imageBuffer: UIImage?
+    var preView: UIView?
+    var zoom: Float = 1.0
+    var queue: dispatch_queue_t?
+    
+    // buttons
+    var shutterButton: UIButton?
+    var frontButton: UIButton?
+    var flashButton: UIButton?
+    
+    // label
+    var flashLabel: UILabel?
+    // container
+    var buttonContainer: UIView?
+    
+    
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        zoom = 1.0
+        isFlashMode = false
+        isFrontMode = false
+        isProcessing = false
+        isRequireTakePhoto = false
+        /*var width = self.view.frame.size.width//640
+        var height = self.view.frame.size.height//480
+        var captureSize = width * height * 4
+        //bitmap = malloc(captureSize)
+        var colorSpace = CGColorSpaceCreateDeviceRGB()
+        //var dataProviderRef = CGDataProviderCreateWithData(NULL, bitmap, captureSize, NULL)
+        //var bitmapInfo = kCGBitmapByteOrder32Little | kCGImageAlphaPremultipliedFirst
+        //var cgImage = CGImageCreate(width, height, 8, 32, width * 4, colorSpace, bitmapInfo, dataProviderRef, NULL, 0, kCGRenderingIntentDefault)
+        //var tes = CGImageCreate(<#T##width: Int##Int#>, <#T##height: Int##Int#>, <#T##bitsPerComponent: Int##Int#>, <#T##bitsPerPixel: Int##Int#>, <#T##bytesPerRow: Int##Int#>, <#T##space: CGColorSpace?##CGColorSpace?#>, <#T##bitmapInfo: CGBitmapInfo##CGBitmapInfo#>, <#T##provider: CGDataProvider?##CGDataProvider?#>, <#T##decode: UnsafePointer<CGFloat>##UnsafePointer<CGFloat>#>, <#T##shouldInterpolate: Bool##Bool#>, <#T##intent: CGColorRenderingIntent##CGColorRenderingIntent#>)
+        */
+        
+        /****************************************************/
         
         // セッションの作成.
         mySession = AVCaptureSession()
@@ -70,20 +115,33 @@ class CaneraViewController: UIViewController {
         // セッション開始.
         mySession.startRunning()
         
-        // UIボタンを作成.
-        let btnImage = UIImage(named: "CameraButton")
-        let size = btnImage!.size
-        let myButton = UIButton(frame:CGRectMake(0,0,size.width * 0.5,size.height * 0.5))
-        myButton.backgroundColor = UIColor.redColor();
-        myButton.layer.masksToBounds = true
-        myButton.setTitle("撮影", forState: .Normal)
-        myButton.setImage(btnImage, forState: .Normal)
-        myButton.layer.cornerRadius = 20.0
-        myButton.layer.position = CGPoint(x: self.view.bounds.width/2, y:self.view.bounds.height-50)
-        myButton.addTarget(self, action: "onClickMyButton:", forControlEvents: .TouchUpInside)
+        //buttonをおくContainerを作成
+        buttonContainer = UIView(frame: CGRectMake(0, self.view.frame.size.height * 0.82, self.view.frame.size.width, self.view.frame.size.height * 0.18))
+        buttonContainer?.backgroundColor = UIColor(red: 0, green: 0, blue: 0, alpha: 0.5)
+        self.view.addSubview(buttonContainer!)
         
-        // UIボタンをViewに追加.
-        self.view.addSubview(myButton);
+        ///buttons
+        shutterButton = UIButton(type: .Custom)
+        shutterButton?.frame = CGRectMake(0, 0, 64, 64)
+        shutterButton?.center = CGPointMake(buttonContainer!.frame.size.width * 0.5, buttonContainer!.frame.size.height * 0.55)
+        shutterButton!.setImage(UIImage(named: "CameraButton"), forState: .Normal)
+        shutterButton?.addTarget(self, action: "onClickMyButton:", forControlEvents: .TouchUpInside)
+        buttonContainer!.addSubview(shutterButton!)
+        
+        flashButton = UIButton(type: .Custom)
+        flashButton!.frame = CGRectMake(0, 0, 26, 26)
+        flashButton!.center = CGPointMake(buttonContainer!.frame.size.width * 0.9, buttonContainer!.frame.size.height * 0.74)
+        flashButton!.setImage(UIImage(named: "flash.png"), forState: .Normal)
+        flashButton!.addTarget(self, action: "flashButtonTouchUpInside:", forControlEvents:.TouchUpInside)
+        buttonContainer!.addSubview(flashButton!)
+        
+        frontButton = UIButton(type: .Custom)
+        frontButton!.frame = CGRectMake(0, 0, 26, 26)
+        frontButton!.center = CGPointMake(buttonContainer!.frame.size.width * 0.9, buttonContainer!.frame.size.height * 0.40)
+        frontButton!.setImage(UIImage(named: "front.png"), forState: .Normal)
+        frontButton!.addTarget(self, action: "frontButtonTouchUpInside:", forControlEvents:.TouchUpInside)
+        buttonContainer!.addSubview(frontButton!)
+
         
     }
     
