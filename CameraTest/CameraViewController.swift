@@ -32,7 +32,7 @@ class CaneraViewController: UIViewController {
     var previewLayer: AVCaptureVideoPreviewLayer?
     var imageBuffer: UIImage?
     var preView: UIView?
-    var zoom: Float = 1.0
+    var zoom: CGFloat = 1.0
     var queue: dispatch_queue_t?
     
     // buttons
@@ -131,16 +131,25 @@ class CaneraViewController: UIViewController {
         flashButton = UIButton(type: .Custom)
         flashButton!.frame = CGRectMake(0, 0, 26, 26)
         flashButton!.center = CGPointMake(buttonContainer!.frame.size.width * 0.9, buttonContainer!.frame.size.height * 0.74)
-        flashButton!.setImage(UIImage(named: "flash.png"), forState: .Normal)
+        flashButton!.setImage(UIImage(named: "flash"), forState: .Normal)
         flashButton!.addTarget(self, action: "flashButtonTouchUpInside:", forControlEvents:.TouchUpInside)
         buttonContainer!.addSubview(flashButton!)
         
         frontButton = UIButton(type: .Custom)
         frontButton!.frame = CGRectMake(0, 0, 26, 26)
         frontButton!.center = CGPointMake(buttonContainer!.frame.size.width * 0.9, buttonContainer!.frame.size.height * 0.40)
-        frontButton!.setImage(UIImage(named: "front.png"), forState: .Normal)
+        frontButton!.setImage(UIImage(named: "changeCamera"), forState: .Normal)
         frontButton!.addTarget(self, action: "frontButtonTouchUpInside:", forControlEvents:.TouchUpInside)
         buttonContainer!.addSubview(frontButton!)
+
+        //label
+        flashLabel = UILabel(frame: CGRectMake(0, 0, 30, 20))
+        flashLabel!.text = "OFF"
+        flashLabel!.center = CGPointMake(flashButton!.center.x - 30, flashButton!.center.y)
+        flashLabel!.font = UIFont.boldSystemFontOfSize(12)
+        flashLabel!.textAlignment = .Right
+        flashLabel!.textColor = UIColor.whiteColor()
+        buttonContainer!.addSubview(flashLabel!)
 
         
     }
@@ -154,15 +163,49 @@ class CaneraViewController: UIViewController {
         // 接続から画像を取得.
         self.myImageOutput.captureStillImageAsynchronouslyFromConnection(myVideoConnection, completionHandler: { (imageDataBuffer, error) -> Void in
             
+            
             // 取得したImageのDataBufferをJpegに変換.
             let myImageData : NSData = AVCaptureStillImageOutput.jpegStillImageNSDataRepresentation(imageDataBuffer)
             
             // JpegからUIIMageを作成.
             // let myImage : UIImage = UIImage(data: myImageData)!
-            let myImage = UIImage(data: myImageData)!
+            var myImage = UIImage(data: myImageData)!
+            //切り取る範囲を決定
+            let rect = CGRectMake(myImage.size.width*0.5 - myImage.size.width*(1.0/self.zoom)*0.5,
+                myImage.size.height*0.5  - myImage.size.height*(1.0/self.zoom)*0.5,
+                myImage.size.width*(1.0/self.zoom),
+                myImage.size.height*(1.0/self.zoom))
+            
             // アルバムに追加.
             UIImageWriteToSavedPhotosAlbum(myImage, self, nil, nil)
             
         })
     }
+    
+    //MARK: -Camera
+    func captureOutput -> AVCaptureOutput{
+        
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
+    
 }
